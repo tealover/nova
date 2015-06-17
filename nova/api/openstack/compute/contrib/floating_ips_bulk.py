@@ -72,6 +72,8 @@ class FloatingIPBulkController(object):
                       'pool': floating_ip.pool,
                       'interface': floating_ip.interface,
                       'project_id': floating_ip.project_id,
+                      'id': floating_ip.id,
+                      'host': floating_ip.host,
                       'instance_uuid': instance_uuid,
                       'fixed_ip': fixed_ip}
             floating_ip_info['floating_ip_info'].append(result)
