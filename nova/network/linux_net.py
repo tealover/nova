@@ -1608,6 +1608,7 @@ class LinuxBridgeInterfaceDriver(LinuxNetInterfaceDriver):
             # bridge, which will either be the vlan interface, or a
             # physical NIC.
             _execute('ip', 'link', 'set', bridge, 'up', run_as_root=True)
+            _execute('ip', 'link', 'set', bridge, 'promisc', 'on', run_as_root=True)
 
         if interface:
             LOG.debug('Adding interface %(interface)s to bridge %(bridge)s',
