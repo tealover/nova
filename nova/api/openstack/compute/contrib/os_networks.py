@@ -186,7 +186,8 @@ class NetworkController(wsgi.Controller):
             raise exc.HTTPUnprocessableEntity()
 
         network_id = body.get('id', None)
-        project_id = context.project_id
+        #project_id = context.project_id
+        project_id = body.get('tenant_id', None)
 
         try:
             self.network_api.add_network_to_project(
