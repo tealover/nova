@@ -1011,9 +1011,9 @@ def get_dhcp_opts(context, network_ref, fixedips):
     # NOTE(vish): if we are in multi-host mode and we are not sharing
     #             addresses, then we actually need to hand out the
     #             dhcp server address as the gateway.
-    if network_ref['multi_host'] and not (network_ref['share_address'] or
-                                          CONF.share_dhcp_address):
-        gateway = network_ref['dhcp_server']
+    #if network_ref['multi_host'] and not (network_ref['share_address'] or
+    #                                      CONF.share_dhcp_address):
+    #    gateway = network_ref['dhcp_server']
     hosts = []
     if CONF.use_single_default_gateway:
         for fixedip in fixedips:
