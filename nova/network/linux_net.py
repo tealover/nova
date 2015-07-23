@@ -1136,6 +1136,8 @@ def restart_dhcp(context, dev, network_ref, fixedips):
            '--dhcp-hostsfile=%s' % _dhcp_file(dev, 'conf'),
            '--dhcp-script=%s' % CONF.dhcpbridge,
            '--no-hosts',
+           '--cache-size=0',
+           '--no-negcache',
            '--leasefile-ro']
 
     # dnsmasq currently gives an error for an empty domain,
