@@ -70,8 +70,8 @@ class VCState(object):
         about_info = self._session._call_method(vim_util, "get_about_info")
         data = {}
         data["vcpus"] = stats['vcpus']
-        data["disk_total"] = capacity / units.Gi
-        data["disk_available"] = freespace / units.Gi
+        data["disk_total"] = stats["total_disk"] / units.Gi
+        data["disk_available"] = stats["free_disk"] / units.Gi
         data["disk_used"] = data["disk_total"] - data["disk_available"]
         data["host_memory_total"] = stats['mem']['total']
         data["host_memory_free"] = stats['mem']['free']

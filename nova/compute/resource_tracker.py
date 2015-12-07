@@ -459,6 +459,7 @@ class ResourceTracker(object):
         else:
             resources['pci_device_pools'] = []
 
+        resources['local_gb_used'] = resources['local_gb'] - resources['available_disk_gb']
         self._report_final_resource_view(resources)
 
         metrics = self._get_host_metrics(context, self.nodename)

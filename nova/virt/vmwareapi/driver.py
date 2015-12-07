@@ -412,6 +412,7 @@ class VMwareVCDriver(driver.ComputeDriver):
         return {'vcpus': host_stats['vcpus'],
                'memory_mb': host_stats['host_memory_total'],
                'local_gb': host_stats['disk_total'],
+               'available_disk_gb': host_stats['disk_available'],
                'vcpus_used': 0,
                'memory_mb_used': host_stats['host_memory_total'] -
                                  host_stats['host_memory_free'],

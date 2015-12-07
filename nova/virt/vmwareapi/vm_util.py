@@ -1049,10 +1049,12 @@ def get_stats_from_cluster(session, cluster):
     """Get the aggregate resource stats of a cluster."""
     vcpus = 0
     mem_info = {'total': 0, 'free': 0}
+    total_disk = 0
+    free_disk = 0
     # Get the Host and Resource Pool Managed Object Refs
     prop_dict = session._call_method(vim_util, "get_dynamic_properties",
                                      cluster, "ClusterComputeResource",
-                                     ["host", "resourcePool"])
+                                     ["host", "resourcePool", "datastore"])
     if prop_dict:
         host_ret = prop_dict.get('host')
         if host_ret:
@@ -1080,7 +1082,27 @@ def get_stats_from_cluster(session, cluster):
                 # overallUsage is the hypervisor's view of memory usage by VM's
                 consumed = int(res_usage.overallUsage / units.Mi)
                 mem_info['free'] = mem_info['total'] - consumed
-    stats = {'vcpus': vcpus, 'mem': mem_info}
+
+        datastore_ret = prop_dict.get('datastore')
+        if datastore_ret:
+            data_store_mors = datastore_ret.ManagedObjectReference
+            data_stores = session._call_method(vim_util,
+                        "get_properties_for_a_collection_of_objects",
+                        "Datastore", data_store_mors,
+                        ["summary.type", "summary.name",
+                         "summary.capacity", "summary.freeSpace",
+                         "summary.accessible",
+                         "summary.maintenanceMode"])
+            for data_store in data_stores.objects:
+                if not hasattr(data_store, 'propSet'):
+                    continue
+                propdict = propset_dict(data_store.propSet)
+                if not propdict['summary.accessible']:
+                    continue
+                total_disk += propdict['summary.capacity']
+                free_disk += propdict['summary.freeSpace']
+
+    stats = {'vcpus': vcpus, 'mem': mem_info, 'total_disk': total_disk, 'free_disk': free_disk}
     return stats
 
 
