@@ -50,6 +50,9 @@ class MultinicController(wsgi.Controller):
 
         instance = common.get_instance(self.compute_api, context, id)
         network_id = body['addFixedIp']['networkId']
+        if 'fixedIP' in body['addFixedIp']:
+            fixed_ip = body['addFixedIp']['fixedIP']
+            network_id = network_id + "|" + fixed_ip
         try:
             self.compute_api.add_fixed_ip(context, instance, network_id)
         except exception.NoMoreFixedIps as e:

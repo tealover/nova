@@ -773,13 +773,19 @@ class NetworkManager(manager.Manager):
     def add_fixed_ip_to_instance(self, context, instance_id, host, network_id,
                                  rxtx_factor=None):
         """Adds a fixed ip to an instance from specified network."""
-        if uuidutils.is_uuid_like(network_id):
-            network = self.get_network(context, network_id)
+        LOG.info("add_fixed_ip_to_instance: Add fixed ip on network %s", network_id)
+        network_arrs = network_id.split('|')
+        if uuidutils.is_uuid_like(network_arrs[0]):
+            network = self.get_network(context, network_arrs[0])
         else:
-            network = self._get_network_by_id(context, network_id)
+            network = self._get_network_by_id(context, network_arrs[0])
+
+        requested_networks = []
+        if len(network_arrs) > 1:
+            requested_networks.append(objects.NetworkRequest.from_tuple((network_arrs[0], network_arrs[1])))
         LOG.debug('Add fixed ip on network %s', network['uuid'],
                   instance_uuid=instance_id)
-        self._allocate_fixed_ips(context, instance_id, host, [network])
+        self._allocate_fixed_ips(context, instance_id, host, [network], requested_networks=requested_networks)
         return self.get_instance_nw_info(context, instance_id, rxtx_factor,
                                          host)
 
