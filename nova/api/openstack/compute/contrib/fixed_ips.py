@@ -19,11 +19,47 @@ from nova.api.openstack import extensions
 from nova import exception
 from nova.i18n import _
 from nova import objects
+from nova import network
 
 authorize = extensions.extension_authorizer('compute', 'fixed_ips')
 
 
+def _translate_fixed_ip_view(fixed_ip):
+    print fixed_ip
+    result = {
+        'id': fixed_ip['id'],
+        'instance_uuid': fixed_ip['instance_uuid'],
+        'address': fixed_ip['address'],
+        'network_id': fixed_ip['network_id'],
+        'allocated': fixed_ip['allocated'],
+        'leased': fixed_ip['leased'],
+        'reserved': fixed_ip['reserved'],
+        'virtual_interface_id': fixed_ip['virtual_interface_id'],
+        'host': fixed_ip['host'],
+        'deleted': fixed_ip['deleted'],
+    }
+    return {'fixed_ip': result}
+
+
+def _translate_fixed_ips_view(fixed_ips):
+    return {'fixed_ips': [_translate_fixed_ip_view(ip)['fixed_ip']
+                          for ip in fixed_ips]}
+
+
 class FixedIPController(object):
+
+    def index(self, req):
+        """Return a list of fixed ips."""
+        context = req.environ['nova.context']
+        authorize(context)
+        network_id = req.params.get('network_id')
+        try:
+            fixed_ips = network.API().get_fixed_ips_by_network_id(context, network_id)
+        except exception.NoFixedIpsDefined() as ex:
+            raise webob.exc.HTTPNotFound(explanation=ex.format_message())
+
+        return _translate_fixed_ips_view(fixed_ips)
+
     def show(self, req, id):
         """Return data about the given fixed ip."""
         context = req.environ['nova.context']
@@ -38,10 +74,13 @@ class FixedIPController(object):
         except exception.FixedIpInvalid as ex:
             raise webob.exc.HTTPBadRequest(explanation=ex.format_message())
 
-        fixed_ip_info = {"fixed_ip": {}}
+        #fixed_ip_info = {"fixed_ip": {}}
+
         if fixed_ip is None:
             msg = _("Fixed IP %s has been deleted") % id
             raise webob.exc.HTTPNotFound(explanation=msg)
+
+        fixed_ip_info = _translate_fixed_ip_view(fixed_ip)
 
         fixed_ip_info['fixed_ip']['cidr'] = str(fixed_ip.network.cidr)
         fixed_ip_info['fixed_ip']['address'] = str(fixed_ip.address)

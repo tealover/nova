@@ -64,6 +64,13 @@ vmops_opts = [
                     'be shared between compute nodes. Note: this should only '
                     'be used when the compute nodes have a shared file '
                     'system.'),
+    cfg.BoolOpt('support_vi_copy',
+               default=False,
+               help='support copy in vcenter between defferent datastore'),
+    cfg.StrOpt('glance_store', help='backend type of glance image'),
+    cfg.StrOpt('vmware_datacenter_path', help='vcenter datacenter'),
+    cfg.StrOpt('vmware_datastore_name', help='datastore name'),
+    cfg.StrOpt('vmware_store_image_dir', help='image store direction'),
     ]
 
 CONF = cfg.CONF
@@ -237,6 +244,7 @@ class VMwareVMOps(object):
                                                       cookies)
         uploaded_iso_path = datastore.build_path(uploaded_iso_path)
         self._attach_cdrom_to_vm(
+
             vm_ref, instance,
             datastore.ref,
             str(uploaded_iso_path))
@@ -298,16 +306,25 @@ class VMwareVMOps(object):
                    'file_path': image_ds_loc,
                    'datastore_name': vi.datastore.name},
                   instance=vi.instance)
-
-        images.fetch_image(
-            context,
-            vi.instance,
-            session._host,
-            session._port,
-            vi.dc_info.name,
-            vi.datastore.name,
-            image_ds_loc.rel_path,
-            cookies=cookies)
+        if CONF.vmware.support_vi_copy:
+            LOG.warn("copy image from glance backend to destination")
+            src_file = "[" + CONF.vmware.vmware_datastore_name + "]" + CONF.vmware.vmware_store_image_dir\
+                       + "/" + vi.ii.image_id
+            src_dc_ref = vi.dc_info.ref
+            dst_file = image_ds_loc
+            dst_dc_ref = vi.dc_info.ref
+            ds_util.mkdir(self._session, image_ds_loc.parent, vi.dc_info.ref)
+            images.fetch_image_by_vi_copy(session, src_file, src_dc_ref, dst_file, dst_dc_ref)
+        else:
+            images.fetch_image(
+                context,
+                vi.instance,
+                session._host,
+                session._port,
+                vi.dc_info.name,
+                vi.datastore.name,
+                image_ds_loc.rel_path,
+                cookies=cookies)
 
     def _fetch_image_as_vapp(self, context, vi, image_ds_loc):
         """Download stream optimized image to host as a vApp."""
@@ -500,14 +517,14 @@ class VMwareVMOps(object):
             if not ds_util.file_exists(self._session, ds_browser,
                                        vi.cache_image_folder,
                                        vi.cache_image_path.basename):
-                LOG.debug("Preparing fetch location", instance=vi.instance)
+                LOG.warn("Preparing fetch location", instance=vi.instance)
                 tmp_dir_loc, tmp_image_ds_loc = image_prepare(vi)
-                LOG.debug("Fetch image to %s", tmp_image_ds_loc,
+                LOG.warn("Fetch image to %s", tmp_image_ds_loc,
                           instance=vi.instance)
                 image_fetch(context, vi, tmp_image_ds_loc)
-                LOG.debug("Caching image", instance=vi.instance)
+                LOG.warn("Caching image", instance=vi.instance)
                 image_cache(vi, tmp_image_ds_loc)
-                LOG.debug("Cleaning up location %s", str(tmp_dir_loc),
+                LOG.warn("Cleaning up location %s", str(tmp_dir_loc),
                           instance=vi.instance)
                 self._delete_datastore_file(str(tmp_dir_loc), vi.dc_info.ref)
 

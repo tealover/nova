@@ -1221,6 +1221,14 @@ def fixed_ip_associate_pool(context, network_id, instance_uuid=None,
 
     return fixed_ip_ref
 
+@require_context
+def fixed_ip_list(context, network_id):
+    result = model_query(context, models.FixedIp, read_deleted="yes").\
+        filter_by(network_id=network_id).\
+        all()
+    if not result:
+        raise exception.NoFixedIpsDefined()
+    return result
 
 @require_context
 def fixed_ip_create(context, values):

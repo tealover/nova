@@ -72,6 +72,7 @@ def network_dict(context, network, extended):
                 result[field] = network.get(field, None)
         uuid = network.get('uuid')
         if uuid:
+            result['key_id'] = result['id']
             result['id'] = uuid
         return result
     else:

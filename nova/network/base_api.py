@@ -332,3 +332,6 @@ class NetworkAPI(base.Base):
         :param host: The host which network should be cleanup for instance.
         """
         raise NotImplementedError()
+
+    def get_fixed_ips_by_network_id(self, context, network_id):
+        raise NotImplementedError()

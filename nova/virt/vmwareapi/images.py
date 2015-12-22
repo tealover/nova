@@ -33,6 +33,8 @@ from nova.i18n import _, _LE, _LI
 from nova import image
 from nova.virt.vmwareapi import constants
 from nova.virt.vmwareapi import io_util
+from nova.virt.vmwareapi import ds_util
+
 
 # NOTE(mdbooth): We use use_linked_clone below, but don't have to import it
 # because nova.virt.vmwareapi.driver is imported first. In fact, it is not
@@ -480,3 +482,14 @@ def upload_image_stream_optimized(context, image_id, instance, session,
 
     LOG.debug("Uploaded image %s to the Glance image server", image_id,
               instance=instance)
+
+
+def fetch_image_by_vi_copy(session, src_file, src_dc_ref, dst_file, dst_dc_ref):
+    LOG.info("copy %{src_file}s from %{src_dc_ref}s to %s{dst_file}s in %{dst_dc_ref}s.",
+        {'src_file': src_file,
+         'src_dc_ref': src_dc_ref,
+         'dst_file': dst_file,
+         'dst_dc_ref': dst_dc_ref} )
+
+    ds_util.file_copy(session, src_file, src_dc_ref, dst_file, dst_dc_ref)
+

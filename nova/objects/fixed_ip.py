@@ -238,6 +238,12 @@ class FixedIPList(obj_base.ObjectListBase, obj_base.NovaObject):
                                       objects.FixedIP, db_fixedips)
 
     @obj_base.remotable_classmethod
+    def get_all_by_network(cls, context, network_id):
+        db_fixedips = db.fixed_ip_list_by_network(context, network_id)
+        return obj_base.obj_make_list(context, cls(context),
+                                      objects.FixedIP, db_fixedips)
+
+    @obj_base.remotable_classmethod
     def get_by_instance_uuid(cls, context, instance_uuid):
         expected_attrs = ['network', 'virtual_interface', 'floating_ips']
         db_fixedips = db.fixed_ip_get_by_instance(context, instance_uuid)

@@ -542,6 +542,11 @@ def fixed_ip_get_all(context):
     return IMPL.fixed_ip_get_all(context)
 
 
+def fixed_ip_list_by_network(context, network_id):
+    """Get all defined fixed ips by network_id"""
+    return IMPL.fixed_ip_list(context, network_id)
+
+
 def fixed_ip_get_by_address(context, address, columns_to_join=None):
     """Get a fixed ip by address or raise if it does not exist."""
     return IMPL.fixed_ip_get_by_address(context, address,

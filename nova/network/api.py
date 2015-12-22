@@ -563,3 +563,12 @@ class API(base_api.NetworkAPI):
         self.migrate_instance_start(context, instance,
                                     {'source_compute': host,
                                      'dest_compute': None})
+
+    def get_fixed_ips_by_network_id(self, context, network_id):
+        """Get fixed ip by network id."""
+        try:
+            fixed_ips = objects.FixedIPList.get_all_by_network(
+                context, network_id)
+            return fixed_ips
+        except exception.NoFixedIpsDefined():
+            return []
