@@ -252,7 +252,9 @@ class VMwareVMOps(object):
     def build_virtual_machine(self, instance, image_info, dc_info, datastore,
                               network_info, extra_specs):
         metadata = dict(instance.metadata)
-        flow_control_option = metadata['flow_control_option']
+        flow_control_option = None
+        if hasattr(metadata, 'flow_control_option'):
+            flow_control_option = metadata['flow_control_option']
         if flow_control_option is not None:
             if network_info is not None:
                 for vif in network_info:
