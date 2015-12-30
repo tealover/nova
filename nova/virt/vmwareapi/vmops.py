@@ -253,7 +253,7 @@ class VMwareVMOps(object):
                               network_info, extra_specs):
         metadata = dict(instance.metadata)
         flow_control_option = None
-        if hasattr(metadata, 'flow_control_option'):
+        if 'flow_control_option' in metadata:
             flow_control_option = metadata['flow_control_option']
         if flow_control_option is not None:
             if network_info is not None:
